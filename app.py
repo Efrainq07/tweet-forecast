@@ -39,7 +39,7 @@ def forecast():
         query = request.args.to_dict()
         begin_date = datetime.datetime.strptime(query['begin_date'],formating_date)
         end_date = datetime.datetime.strptime(query['end_date'],formating_date)
-        timestep = datetime.datetime.strptime(query['begin_date'],formating_step)
+        timestep = datetime.datetime.strptime(query['step'],formating_step)
         timestep = datetime.timedelta(hours=timestep.hour, minutes=timesetep.minute, seconds=timestep.second)
         length = query['length']
         param = (5,1,0)
