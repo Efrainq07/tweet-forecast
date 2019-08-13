@@ -1,5 +1,6 @@
 import statistics as st
 import database as dat
+import utils as ut
 import datetime
 
 from flask import Flask, request, jsonify
@@ -20,14 +21,11 @@ twitter = Twython(creds['twitter_token']['CONSUMER_KEY'], creds['twitter_token']
 app = Flask(__name__)
 
 @app.route('/upload', methods = ['GET','POST'])
-def home():
+def upload():
         if request.method == 'GET':
                 query = request.args.to_dict()
                 insert = twitter.search(**query)['statuses']
-                for doc in insert:
-                        formating = "%a %b %d %H:%M:%S %z %Y"
-                        created_at_date = datetime.datetime.strptime(doc['created_at'],formating)
-                        doc["created_at_date"] = created_at_date
+                insert = ut.add_timestamp(insert)
                 ret = jsonify(insert)
                 tweet_col.insert_many(insert)
                 return ret
@@ -36,4 +34,18 @@ def home():
 
 @app.route('/forecast', methods =['GET'])
 def forecast():
-        return st.ARIMA()
+        formating_date = "%m-%d-%y %H:%M:%S"
+        formating_step = "%H:%M:%S"
+        query = request.args.to_dict()
+        begin_date = datetime.datetime.strptime(query['begin_date'],formating_date)
+        end_date = datetime.datetime.strptime(query['end_date'],formating_date)
+        timestep = datetime.datetime.strptime(query['begin_date'],formating_step)
+        timestep = datetime.timedelta(hours=timestep.hour, minutes=timesetep.minute, seconds=timestep.second)
+        length = query['length']
+        param = (5,1,0)
+
+        timeseries = st.get_timeseries(begin_date,end_date,time_step)
+        forecast = st.forecast_ARIMA(timeseries,length,param)
+
+        return jsonify({"forecast":forecast})
+
