@@ -11,7 +11,7 @@ import pandas as pd
 
 
 
-def get_time_series(begin_datetime, end_datetime, time_step):
+def get_timeseries(begin_datetime, end_datetime, time_step):
 
     #Accedemos a la coleccion donde estan los tweets del listener
     tweet_col = pm.collection.Collection(dat.db, 'tweet_listener')
@@ -29,28 +29,29 @@ def get_time_series(begin_datetime, end_datetime, time_step):
     current = begin_datetime
     curr_time = 0
     count = 0
-    timeseries = np.array([[0],[current]])
+    timeseries = [[0],[current]]
 
     for tweet in result:
         if (tweet["created_at_date"] >  current + step):
-            timeseries[curr_time] /= count
+            timeseries[0][curr_time] /= count if count!=0 else 1
             count = 0
             curr_time += 1
             current += step
-            timeseries = np.append(timeseries,0)
-            timeseries = np.append(timeseries,current)
+            timeseries[0].append(0)
+            timeseries[1].append(current)
         count += 1
-        timeseries[curr_time] += tweet['user']['followers_count']
+        timeseries[0][curr_time] += tweet['user']['followers_count']
 
     #Se regresa un DataFrame de pandas
-    return pd.DataFrame({ 'datetime': timeseries[1], 'avg_followers_count': timeseries[0]})
+    return timeseries[0]
     
 
 
 
 
 def forecast_ARIMA(timeseries,length,param):
+    print(timeseries)
     model = ARIMA(timeseries, order=param)
     model_fit = model.fit(disp=0)
     output = model_fit.predict(start = len(timeseries), end = len(timeseries)+length)
-    return output
+    return output.tolist()
