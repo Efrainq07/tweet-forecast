@@ -42,9 +42,10 @@ def forecast():
         time_step = datetime.datetime.strptime(query['step'],formating_step)
         time_step = datetime.timedelta(hours=time_step.hour, minutes=time_step.minute, seconds=time_step.second)
         length = query['length']
+        hashtag = query['hashtag']
         param = (5,1,0)
 
-        timeseries = st.get_timeseries('tweet_listener',begin_date,end_date,time_step)
+        timeseries = st.get_timeseries(hashtag,begin_date,end_date,time_step)
         forecast = st.forecast_ARIMA(timeseries,int(length),param)
 
         return jsonify({"forecast":forecast})

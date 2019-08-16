@@ -55,7 +55,6 @@ def get_timeseries(hashtag, begin_datetime, end_datetime, time_step):
 
 
 def forecast_ARIMA(timeseries,length,param):
-    print(timeseries)
     try:
         model = ARIMA(timeseries, order=param)
     except:
