@@ -6,6 +6,7 @@ import pymongo as pm
 import datetime as dt
 import numpy as np
 import pandas as pd
+import math as mt
 
 
 ''' query = {
@@ -61,4 +62,5 @@ def forecast_ARIMA(timeseries,length,param):
         return "No hay suficientes registros para hacer esa predicción."
     model_fit = model.fit(disp=0)
     output = model_fit.predict(start = len(timeseries), end = len(timeseries)+length)
-    return output.tolist()
+    clean = [i if i>=0 else 0 for i in output.tolist()]
+    return clean
