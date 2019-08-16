@@ -8,18 +8,23 @@ import numpy as np
 import pandas as pd
 
 
+''' query = {
+        "created_at_date" : {'$lt': end_datetime, '$gte': begin_datetime}
+        "entities" : { "hashtags" : {"$in" : [hashtag] } }
+    }'''
 
 
-
-def get_timeseries(begin_datetime, end_datetime, time_step):
+def get_timeseries(hashtag, begin_datetime, end_datetime, time_step):
 
     #Accedemos a la coleccion donde estan los tweets del listener
-    tweet_col = pm.collection.Collection(dat.db, 'tweet_listener')
+    tweet_col = pm.collection.Collection(dat.db, hashtag)
 
     #Consulta a la base de datos para obtener tweets en un intervalo de fechas
     query = {
         "created_at_date" : {'$lt': end_datetime, '$gte': begin_datetime}
     }
+
+
 
     #Consulta
     result = tweet_col.find(query).sort("created_at_date",pm.ASCENDING)
@@ -42,7 +47,7 @@ def get_timeseries(begin_datetime, end_datetime, time_step):
         count += 1
         timeseries[0][curr_time] += tweet['user']['followers_count']
 
-    #Se regresa un DataFrame de pandas
+    #Se regresa una lista
     return timeseries[0]
     
 
@@ -51,7 +56,10 @@ def get_timeseries(begin_datetime, end_datetime, time_step):
 
 def forecast_ARIMA(timeseries,length,param):
     print(timeseries)
-    model = ARIMA(timeseries, order=param)
+    try:
+        model = ARIMA(timeseries, order=param)
+    except:
+        return "No hay suficientes registros para hacer esa predicción."
     model_fit = model.fit(disp=0)
     output = model_fit.predict(start = len(timeseries), end = len(timeseries)+length)
     return output.tolist()
